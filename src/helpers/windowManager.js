@@ -7,6 +7,8 @@ class WindowManager {
     this.controlPanelWindow = null;
     this.historyWindow = null;
     this.settingsWindow = null;
+    this.mainWindowNormalBounds = null;
+    this.alwaysOnTop = false;
   }
 
   async createMainWindow() {
@@ -16,12 +18,14 @@ class WindowManager {
     }
 
     this.mainWindow = new BrowserWindow({
-      width: 400,
-      height: 500,
+      width: 960,
+      height: 720,
+      minWidth: 760,
+      minHeight: 620,
       frame: false,
       transparent: true,
-      alwaysOnTop: true,
-      resizable: false,
+      alwaysOnTop: this.alwaysOnTop,
+      resizable: true,
       skipTaskbar: true,
       movable: true,
       webPreferences: {
@@ -90,9 +94,14 @@ class WindowManager {
     this.historyWindow = new BrowserWindow({
       width: 1000,
       height: 700,
+      minWidth: 820,
+      minHeight: 560,
       show: false,
       title: "转录历史 - 蛐蛐",
-      alwaysOnTop: true,
+      frame: false,
+      transparent: true,
+      alwaysOnTop: this.alwaysOnTop,
+      resizable: true,
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
@@ -124,11 +133,16 @@ class WindowManager {
     }
 
     this.settingsWindow = new BrowserWindow({
-      width: 700,
-      height: 600,
+      width: 860,
+      height: 680,
+      minWidth: 760,
+      minHeight: 560,
       show: false,
       title: "设置 - 蛐蛐",
-      alwaysOnTop: true,
+      frame: false,
+      transparent: true,
+      alwaysOnTop: this.alwaysOnTop,
+      resizable: true,
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
@@ -174,12 +188,12 @@ class WindowManager {
     if (this.historyWindow) {
       this.historyWindow.show();
       this.historyWindow.focus();
-      this.historyWindow.setAlwaysOnTop(true);
+      this.historyWindow.setAlwaysOnTop(this.alwaysOnTop);
     } else {
       this.createHistoryWindow().then(() => {
         this.historyWindow.show();
         this.historyWindow.focus();
-        this.historyWindow.setAlwaysOnTop(true);
+        this.historyWindow.setAlwaysOnTop(this.alwaysOnTop);
       });
     }
   }
@@ -200,12 +214,12 @@ class WindowManager {
     if (this.settingsWindow) {
       this.settingsWindow.show();
       this.settingsWindow.focus();
-      this.settingsWindow.setAlwaysOnTop(true);
+      this.settingsWindow.setAlwaysOnTop(this.alwaysOnTop);
     } else {
       this.createSettingsWindow().then(() => {
         this.settingsWindow.show();
         this.settingsWindow.focus();
-        this.settingsWindow.setAlwaysOnTop(true);
+        this.settingsWindow.setAlwaysOnTop(this.alwaysOnTop);
       });
     }
   }
@@ -235,6 +249,82 @@ class WindowManager {
     if (this.settingsWindow) {
       this.settingsWindow.close();
     }
+  }
+
+  getMainWindowState() {
+    if (!this.mainWindow) {
+      return {
+        isMaximized: false,
+        isAlwaysOnTop: this.alwaysOnTop,
+      };
+    }
+
+    return {
+      isMaximized: this.mainWindow.isMaximized(),
+      isAlwaysOnTop: this.alwaysOnTop,
+    };
+  }
+
+  toggleMainWindowMaximize() {
+    if (!this.mainWindow) {
+      return this.getMainWindowState();
+    }
+
+    if (this.mainWindow.isMaximized()) {
+      this.mainWindow.unmaximize();
+    } else {
+      this.mainWindow.maximize();
+    }
+
+    return this.getMainWindowState();
+  }
+
+  toggleMainWindowAlwaysOnTop() {
+    if (!this.mainWindow) {
+      return this.getMainWindowState();
+    }
+
+    const nextValue = !this.alwaysOnTop;
+    this.alwaysOnTop = nextValue;
+
+    if (this.mainWindow) {
+      this.mainWindow.setAlwaysOnTop(nextValue);
+    }
+    if (this.historyWindow) {
+      this.historyWindow.setAlwaysOnTop(nextValue);
+    }
+    if (this.settingsWindow) {
+      this.settingsWindow.setAlwaysOnTop(nextValue);
+    }
+    if (this.controlPanelWindow) {
+      this.controlPanelWindow.setAlwaysOnTop(nextValue);
+    }
+
+    return this.getMainWindowState();
+  }
+
+  setMainWindowCompactMode(enabled) {
+    if (!this.mainWindow) {
+      return this.getMainWindowState();
+    }
+
+    if (enabled) {
+      if (!this.mainWindowNormalBounds) {
+        this.mainWindowNormalBounds = this.mainWindow.getBounds();
+      }
+      this.mainWindow.setMinimumSize(250, 210);
+      this.mainWindow.setSize(270, 230, true);
+    } else {
+      this.mainWindow.setMinimumSize(760, 620);
+      if (this.mainWindowNormalBounds) {
+        this.mainWindow.setBounds(this.mainWindowNormalBounds, true);
+      } else {
+        this.mainWindow.setSize(960, 720, true);
+      }
+      this.mainWindowNormalBounds = null;
+    }
+
+    return this.getMainWindowState();
   }
 }
 

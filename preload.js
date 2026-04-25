@@ -6,6 +6,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
   hideWindow: () => ipcRenderer.invoke("hide-window"),
   showWindow: () => ipcRenderer.invoke("show-window"),
   minimizeWindow: () => ipcRenderer.invoke("minimize-window"),
+  toggleMaximizeWindow: () => ipcRenderer.invoke("toggle-maximize-window"),
+  toggleAlwaysOnTopWindow: () => ipcRenderer.invoke("toggle-always-on-top-window"),
+  getWindowState: () => ipcRenderer.invoke("get-window-state"),
+  setMainWindowCompactMode: (enabled) => ipcRenderer.invoke("set-main-window-compact-mode", enabled),
+  minimizeCurrentWindow: () => ipcRenderer.invoke("minimize-current-window"),
+  toggleMaximizeCurrentWindow: () => ipcRenderer.invoke("toggle-maximize-current-window"),
   closeWindow: () => ipcRenderer.invoke("close-window"),
 
   // 录音相关

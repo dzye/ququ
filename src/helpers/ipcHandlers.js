@@ -245,6 +245,45 @@ class IPCHandlers {
       return true;
     });
 
+    ipcMain.handle("toggle-maximize-window", () => {
+      return this.windowManager.toggleMainWindowMaximize();
+    });
+
+    ipcMain.handle("toggle-always-on-top-window", () => {
+      return this.windowManager.toggleMainWindowAlwaysOnTop();
+    });
+
+    ipcMain.handle("get-window-state", () => {
+      return this.windowManager.getMainWindowState();
+    });
+
+    ipcMain.handle("set-main-window-compact-mode", (event, enabled) => {
+      return this.windowManager.setMainWindowCompactMode(Boolean(enabled));
+    });
+
+    ipcMain.handle("minimize-current-window", (event) => {
+      const window = require("electron").BrowserWindow.fromWebContents(event.sender);
+      if (window) {
+        window.minimize();
+      }
+      return true;
+    });
+
+    ipcMain.handle("toggle-maximize-current-window", (event) => {
+      const window = require("electron").BrowserWindow.fromWebContents(event.sender);
+      if (!window) {
+        return { isMaximized: false };
+      }
+
+      if (window.isMaximized()) {
+        window.unmaximize();
+      } else {
+        window.maximize();
+      }
+
+      return { isMaximized: window.isMaximized() };
+    });
+
     ipcMain.handle("close-window", () => {
       if (this.windowManager.mainWindow) {
         this.windowManager.mainWindow.close();

@@ -49,10 +49,13 @@ export const usePermissions = (showAlertDialog) => {
         window.electronAPI.log('error', '辅助功能权限测试失败:', err);
       }
       setAccessibilityPermissionGranted(false);
+      if (window.electronAPI?.requestPermissions) {
+        await window.electronAPI.requestPermissions();
+      }
       if (showAlertDialog) {
         showAlertDialog({
           title: "❌ 需要辅助功能权限",
-          description: "请在系统设置中授予辅助功能权限，以启用自动文本粘贴功能。"
+          description: "已打开系统设置。macOS 需要你手动授予辅助功能权限，应用无法自动开启。"
         });
       } else {
         alert("❌ 需要辅助功能权限！请在系统设置中授予权限。");
